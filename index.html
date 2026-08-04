@@ -7,6 +7,15 @@
     <meta name="description" content="Aplicación web de control financiero para tarjeta Santander WorldMember y préstamos a terceros.">
     <!-- Google Fonts: Outfit & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Santander WorldMember — Gestión Inteligente de Tarjeta de Crédito</title>
+    <meta name="description" content="Aplicación web de control financiero para tarjeta Santander WorldMember y préstamos a terceros.">
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
@@ -14,9 +23,49 @@
     <!-- Chart.js CDN (Esencial para renderizar los gráficos del Analytics) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css?v=20260804-10">
 </head>
 <body>
+
+    <!-- SUPABASE AUTH MODAL (GLASSMORPHISM) -->
+    <div id="authModal" class="auth-modal-overlay">
+        <div class="auth-modal-content">
+            <div class="auth-header">
+                <div class="brand-icon"><i data-lucide="flame"></i></div>
+                <h2>Bienvenido a Santander</h2>
+                <p>Sincronización en la nube activada</p>
+            </div>
+            
+            <form id="authForm" class="auth-form">
+                <div class="form-group">
+                    <label for="authEmail">Correo Electrónico</label>
+                    <input type="email" id="authEmail" required placeholder="tu@correo.com">
+                </div>
+                <div class="form-group">
+                    <label for="authPassword">Contraseña</label>
+                    <input type="password" id="authPassword" required placeholder="••••••••">
+                </div>
+                
+                <div id="authErrorMsg" class="auth-error-msg"></div>
+                
+                <div class="auth-actions">
+                    <button type="submit" class="btn btn-primary btn-block" id="btnLogin">Iniciar Sesión</button>
+                    <button type="button" class="btn btn-secondary btn-block" id="btnRegister">Registrarse</button>
+                </div>
+            </form>
+            <div class="auth-footer">
+                <p>Protegido con encriptación de extremo a extremo.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN SYNC OVERLAY -->
+    <div id="syncOverlay" class="sync-overlay hidden">
+        <div class="sync-spinner"></div>
+        <p>Sincronizando con la nube...</p>
+    </div>
 
     <!-- SIDEBAR COLAPSABLE FLOTANTE (ALINEACIÓN PERFECTA Y CENTRADA EN AMBOS ESTADOS) -->
     <div class="app-layout">
@@ -80,6 +129,10 @@
                     <button class="btn-footer-action action-settings" id="btnOpenSettings" title="Configurar Tarjeta">
                         <i data-lucide="settings"></i>
                         <span class="nav-label">Configurar Tarjeta</span>
+                    </button>
+                    <button class="btn-footer-action action-logout" id="btnLogout" title="Cerrar Sesión">
+                        <i data-lucide="log-out"></i>
+                        <span class="nav-label">Cerrar Sesión</span>
                     </button>
                 </div>
             </div>
@@ -813,6 +866,7 @@
     <!-- TOAST NOTIFICATIONS CONTAINER -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <script src="app.js?v=20260804-7"></script>
+    <script src="app.js?v=20260804-10"></script>
+    <script src="supabase-sync.js?v=20260804-1"></script>
 </body>
 </html>

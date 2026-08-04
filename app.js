@@ -224,6 +224,9 @@ function loadData() {
 function saveData() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
     renderAll();
+    if (typeof window.syncToSupabase === 'function') {
+        window.syncToSupabase();
+    }
 }
 
 function loadFriendsList() {
@@ -247,6 +250,9 @@ function loadFriendsList() {
 function saveFriendsList() {
     localStorage.setItem(FRIENDS_STORAGE_KEY, JSON.stringify(savedFriends));
     updateFriendsDatalist();
+    if (typeof window.syncToSupabase === 'function') {
+        window.syncToSupabase();
+    }
 }
 
 function addFriendToMemory(name) {
