@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Santander WorldMember — Gestión Inteligente de Tarjeta de Crédito</title>
+    <meta name="description" content="Aplicación web de control financiero para tarjeta Santander WorldMember y préstamos a terceros.">
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js CDN (Esencial para renderizar los gráficos del Analytics) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <link rel="stylesheet" href="style.css?v=20260804-7">
+</head>
+<body>
+
+    <!-- SIDEBAR COLAPSABLE FLOTANTE (ALINEACIÓN PERFECTA Y CENTRADA EN AMBOS ESTADOS) -->
+    <div class="app-layout">
+        <aside class="sidebar" id="mainSidebar">
+            <button class="btn-sidebar-toggle" id="btnToggleSidebar" title="Colapsar / Expandir Menú (270px)">
+                <i data-lucide="chevron-left" id="toggleSidebarIcon"></i>
+            </button>
+
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <i data-lucide="flame"></i>
+                    </div>
+                    <div class="brand-text">
+                        <h1>Santander</h1>
+                        <span class="subtitle">Banca Privada</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav" id="sidebarNav">
+                <button class="nav-item active" data-view="view-dashboard" title="Dashboard Principal" aria-label="Dashboard Principal">
+                    <i data-lucide="layout-grid"></i>
+                    <span class="nav-label">Dashboard Principal</span>
+                </button>
+                
+                <button class="nav-item" data-view="view-transactions" title="Movimientos y Abonos" aria-label="Movimientos y Abonos">
+                    <i data-lucide="list-ordered"></i>
+                    <span class="nav-label">Movimientos y Abonos</span>
+                </button>
+                
+                <button class="nav-item nav-item-special" data-view="view-debtors" title="¿Quién me debe?" aria-label="¿Quién me debe?">
+                    <i data-lucide="users"></i>
+                    <span class="nav-label">¿Quién me debe?</span>
+                </button>
+                <button class="nav-item" data-view="view-installments" title="Proyección Cuotas" aria-label="Proyección Cuotas">
+                    <i data-lucide="layers"></i>
+                    <span class="nav-label">Proyección Cuotas</span>
+                </button>
+                <button class="nav-item" data-view="view-analytics" title="Gráficos y Analytics" aria-label="Gráficos y Analytics">
+                    <i data-lucide="pie-chart"></i>
+                    <span class="nav-label">Gráficos y Analytics</span>
+                </button>
+
+                <button class="nav-item nav-item-mobile-more" id="btnMobileTools" type="button" title="Más opciones" aria-label="Más opciones">
+                    <i data-lucide="more-horizontal"></i>
+                    <span class="nav-label">Más</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-actions-list">
+                    <button class="btn-footer-action" id="btnImport" title="Importar Respaldo">
+                        <i data-lucide="upload-cloud"></i>
+                        <span class="nav-label">Importar Respaldo</span>
+                    </button>
+                    <button class="btn-footer-action" id="btnExport" title="Exportar Respaldo">
+                        <i data-lucide="download-cloud"></i>
+                        <span class="nav-label">Exportar Respaldo</span>
+                    </button>
+                    <button class="btn-footer-action action-settings" id="btnOpenSettings" title="Configurar Tarjeta">
+                        <i data-lucide="settings"></i>
+                        <span class="nav-label">Configurar Tarjeta</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT PANEL -->
+        <main class="main-content">
+            
+            <!-- VISTA 1: DASHBOARD PRINCIPAL -->
+            <section id="view-dashboard" class="view-panel active">
+                <header class="view-header">
+                    <div>
+                        <h2>Resumen Operativo</h2>
+                        <p class="text-muted">Estado en tiempo real de tu tarjeta Santander WorldMember</p>
+                    </div>
+                    <div class="view-header-actions">
+                        <button class="btn btn-primary" id="btnNewExpenseHome" aria-label="Registrar Compra">
+                            <i data-lucide="shopping-bag"></i> Registrar Compra
+                        </button>
+                        <button class="btn btn-emerald" id="btnNewPaymentHome" aria-label="Registrar Abono">
+                            <i data-lucide="check-circle-2"></i> Registrar Abono
+                        </button>
+                    </div>
+                </header>
+
+                <!-- REDISEÑO PRO: BENTO GRID DASHBOARD -->
+                <div class="bento-dashboard" id="mainDashboardBento">
+                    <!-- COLUMNA 1: Identidad y Cupo -->
+                    <div class="bento-col">
+                        <div class="credit-card-visual" id="creditCardVisual">
+                            <div class="card-glow"></div>
+                            <div class="card-top" style="position: relative; z-index: 2;">
+                                <span class="card-bank-name" id="displayCardName">SANTANDER WORLDMEMBER</span>
+                                <i data-lucide="wifi" class="wifi-icon"></i>
+                            </div>
+                            <div class="card-chip-container" style="position: relative; z-index: 2;">
+                                <div class="card-chip"></div>
+                                <!-- NUEVO: Emblema decorativo -->
+                                <div class="card-emblem" style="position: absolute; left: 50%; transform: translateX(-50%); width: 28px; height: 28px; border: 1.5px solid rgba(255,255,255,0.4); border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center;">
+                                    <div style="width: 20px; height: 20px; border: 1px solid rgba(255,255,255,0.15); border-radius: 50%;"></div>
+                                </div>
+                                <span class="card-type-badge">WORLDMEMBER</span>
+                            </div>
+                            
+                            <!-- NUEVO: Texto cursivo decorativo -->
+                            <div class="card-cursive-text" style="position: relative; z-index: 2; font-family: 'Playfair Display', serif; font-style: italic; font-size: 24px; text-align: center; color: rgba(255,255,255,0.85); letter-spacing: 1px; margin: 4px 0;">
+                                World Member
+                            </div>
+
+                            <div class="card-number-display" style="position: relative; z-index: 2;">
+                                <span>••••</span> <span>••••</span> <span>••••</span> <span id="displayLast4">4532</span>
+                            </div>
+                            <div class="card-bottom" style="position: relative; z-index: 2;">
+                                <div class="card-info-group">
+                                    <label>TITULAR</label>
+                                    <span id="displayHolderName">BENJAMÍN TRALMA GUTIÉRREZ</span>
+                                </div>
+                                <div class="card-info-group text-right">
+                                    <label>CORTE / PAGO</label>
+                                    <span>Día <strong id="displayClosingDay">25</strong> / Día <strong id="displayDueDay">5</strong></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bento-card solid-card flex-col flex-between utilization-bento">
+                            <div class="flex-between w-100 align-center mb-4">
+                                <h3 class="bento-title m-0">Uso de Límite</h3>
+                                <button class="btn-icon-small" id="btnCalibrateLimit" title="Calibrar cupo"><i data-lucide="scale"></i></button>
+                            </div>
+                            
+                            <div class="flex-between w-100 mb-2">
+                                <div class="flex-col">
+                                    <span class="text-xs text-muted mb-1">Disponible</span>
+                                    <span class="text-xl text-emerald font-bold" id="statAvailableCredit">$1.000.000</span>
+                                </div>
+                                <div class="flex-col text-right">
+                                    <span class="text-xs text-muted mb-1">Acumulada</span>
+                                    <span class="text-xl text-main font-bold" id="statTotalDebt">$0</span>
+                                </div>
+                            </div>
+
+                            <div class="progress-bar-container progress-md mb-2">
+                                <div class="progress-bar-fill emerald" id="utilizationProgressBar" style="width: 0%;"></div>
+                            </div>
+                            
+                            <div class="flex-between w-100 align-center">
+                                <span class="text-xs text-muted">Límite Total: <strong id="creditLimitTextInner">$1.000.000</strong></span>
+                                <div class="utilization-badge badge-green text-xs" id="utilizationBadge">
+                                    <span id="utilizationPercent">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COLUMNA 2: Deuda Hero y Progreso -->
+                    <div class="bento-col bento-col-center">
+                        <div class="bento-card solid-card hero-debt-card flex-col flex-center text-center">
+                            <div class="cycle-indicator mb-3">
+                                <span class="pulse-dot"></span>
+                                <span id="currentCycleLabel">Ciclo en curso</span>
+                            </div>
+                            <span class="text-sm text-muted mb-2 font-medium">Deuda Total Acumulada</span>
+                            <h2 class="massive-number text-cyan mb-4" id="statTotalPeriodDebt">$0</h2>
+                            
+                            <div class="debt-breakdown-row" id="debtBreakdownRow">
+                                <div class="breakdown-pill breakdown-pill-primary">
+                                    <div class="icon-wrapper"><i data-lucide="shopping-bag" class="text-cyan"></i></div>
+                                    <div class="flex-col text-left">
+                                        <span class="text-xs text-muted">Mes actual</span>
+                                        <strong class="text-cyan stat-primary" id="statStatementBalance">$0</strong>
+                                    </div>
+                                </div>
+                                <div class="breakdown-divider">+</div>
+                                <div class="breakdown-pill">
+                                    <div class="icon-wrapper"><i data-lucide="history" class="text-muted"></i></div>
+                                    <div class="flex-col text-left">
+                                        <span class="text-xs text-muted" style="opacity: 0.6;">Arrastrada</span>
+                                        <strong class="text-main stat-secondary" id="statInitialBalanceDisplay">$0</strong>
+                                    </div>
+                                    <button class="btn-icon-tiny ml-2 edit-initial-btn" id="btnEditInitialBalance" title="Ajustar saldo inicial"><i data-lucide="edit-3"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bento-card solid-card payment-progress-card">
+                            <div class="flex-between w-100 align-center mb-3">
+                                <h3 class="bento-title m-0">Estado de Pago</h3>
+                                <span class="badge badge-outline" id="statementStatusBadge">⏳ Pendiente</span>
+                            </div>
+                            <div class="statement-progress-box">
+                                <div class="flex-between text-sm mb-2">
+                                    <span class="text-muted">Pagado: <strong class="text-emerald" id="statPaidThisCycle">$0</strong></span>
+                                    <span class="text-muted">Por Pagar: <strong class="text-rose" id="statRemainingToPay">$0</strong></span>
+                                </div>
+                                <div class="progress-bar-container progress-md">
+                                    <div class="progress-bar-fill emerald" id="paymentProgressBar" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COLUMNA 3: Grid de Fechas y KPIs -->
+                    <div class="bento-col kpi-bento-grid">
+                        <div class="bento-card solid-card countdown-bento border-glow-cyan">
+                            <div class="flex-row flex-center gap-2 mb-2">
+                                <i data-lucide="calendar-clock" class="text-cyan"></i>
+                                <button class="btn-icon-tiny edit-closing-btn" id="btnEditClosingDate" title="Ajustar fecha real de corte"><i data-lucide="edit-3"></i></button>
+                            </div>
+                            <span class="text-xs text-muted font-medium">PRÓXIMO CORTE</span>
+                            <strong class="text-lg mt-1" id="nextClosingDateDisplay">25 Ago</strong>
+                            <span class="badge-cyan text-xs mt-2 w-fit" id="nextClosingDaysBadge">Faltan 30 días</span>
+                        </div>
+                        
+                        <div class="bento-card solid-card countdown-bento border-glow-amber">
+                            <i data-lucide="alert-circle" class="text-amber mb-2"></i>
+                            <span class="text-xs text-muted font-medium">LÍMITE DE PAGO</span>
+                            <strong class="text-lg mt-1" id="nextDueDateDisplay">5 Sept</strong>
+                            <span class="badge-amber text-xs mt-2 w-fit" id="nextDueDaysBadge">Faltan 41 días</span>
+                        </div>
+
+                        <div class="bento-card solid-card flex-col flex-center text-center p-3 border-glow-purple span-2">
+                            <i data-lucide="users" class="text-purple mb-2"></i>
+                            <span class="text-xs text-muted">PENDIENTE POR COBRAR</span>
+                            <span class="text-xl font-bold text-purple mt-1" id="kpiPrestamosHome">$0</span>
+                        </div>
+
+                        <div class="bento-card solid-card flex-col flex-center text-center p-3 border-glow-emerald">
+                            <i data-lucide="banknote" class="text-emerald mb-2"></i>
+                            <span class="text-xl font-bold" id="kpiTicketPromedio">$0</span>
+                            <span class="text-xs text-muted mt-1">Ticket medio</span>
+                        </div>
+
+                        <div class="bento-card solid-card flex-col flex-center text-center p-3 border-glow-blue">
+                            <i data-lucide="shopping-bag" class="text-blue mb-2"></i>
+                            <span class="text-xl font-bold" id="kpiNumCompras">0</span>
+                            <span class="text-xs text-muted mt-1">Compras</span>
+                        </div>
+                    </div> <!-- END bento-col -->
+
+                    <!-- NUEVA FILA: Compras Recientes (Integrada en el Grid) -->
+                    <div class="dashboard-bottom-row" style="grid-column: 1 / -1; width: 100%;">
+                        <div class="bento-card solid-card flex-col" style="padding: 20px; min-height: 320px;">
+                            <div class="flex-between align-center mb-3">
+                                <div class="flex-col text-left">
+                                    <h3 class="bento-title m-0">Compras Recientes</h3>
+                                    <div id="recentPurchasesSummary" class="text-muted" style="margin-top: 4px; display: flex; align-items: center; gap: 6px; font-size: 13.5px;"></div>
+                                </div>
+                                <button class="btn-ghost-cyan text-xs flex align-center gap-1" onclick="document.querySelector('[data-view=view-transactions]').click()" style="background: transparent; border: none; cursor: pointer; color: var(--cyan); font-weight: 600;">
+                                    Ver todas <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+                                </button>
+                            </div>
+                            <div id="recentPurchasesList" class="flex-col gap-2">
+                                <!-- JS dinámico -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div> <!-- END bento-dashboard -->
+                
+                <!-- Fin de Dashboard -->
+            </section>
+
+            <!-- VISTA 2: ¿QUIÉN ME DEBE? (CENTRO DE COBROS CON LÓGICA DE CUOTAS Y BOTÓN DESHACER) -->
+            <section id="view-debtors" class="view-panel">
+                <header class="view-header">
+                    <div>
+                        <h2>¿Quién me debe? — Centro de Cobros y Préstamos</h2>
+                        <p class="text-muted">Administra lo que pagaste por otras personas. En compras a cuotas, cobra o deshaz cuota por cuota fácilmente.</p>
+                    </div>
+                    <div class="view-header-actions">
+                        <button class="btn btn-purple" id="btnNewLoan">
+                            <i data-lucide="plus-circle"></i> Registrar Préstamo
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Hero Banner de Deuda a Tu Favor (Executive Compact 1-Row) -->
+                <div class="loans-hero-banner glass-card">
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <div class="kpi-icon" style="background: rgba(168, 85, 247, 0.2); width: 36px; height: 36px; border-radius: 10px;">
+                            <i data-lucide="wallet" class="text-purple" style="width: 18px; height: 18px;"></i>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;">
+                            <span class="text-xs text-muted uppercase font-semibold">POR COBRAR:</span>
+                            <span class="loans-total-amount text-purple" id="displayTotalLoansPending" style="font-size: 22px; font-weight: 700; font-family: var(--font-heading);">$0</span>
+                        </div>
+                    </div>
+                    <div class="loans-filter-pills">
+                        <button class="loan-pill active" data-loan-filter="ALL">Todos</button>
+                        <button class="loan-pill" data-loan-filter="Otros">Otros (100%)</button>
+                        <button class="loan-pill" data-loan-filter="Compartido">Compartido (50%)</button>
+                    </div>
+                </div>
+
+                <!-- Grilla de Tarjetas por Persona -->
+                <div class="debtors-grid" id="debtorsCardsGrid">
+                    <!-- Dinámico por JS -->
+                </div>
+
+                <div id="emptyLoansState" class="empty-state glass-card text-center py-12" style="display: none;">
+                    <i data-lucide="user-check" class="w-16 h-16 mx-auto text-muted mb-4 opacity-50"></i>
+                    <h3>Nadie te debe dinero actualmente</h3>
+                    <p class="text-muted max-w-md mx-auto mt-2">Cuando registres una compra y selecciones en Responsable a "Otros" o "Compartido", aparecerán aquí las tarjetas de cobro con control de cuotas.</p>
+                </div>
+            </section>
+
+            <!-- VISTA 3: HISTORIAL DE GASTOS Y ABONOS -->
+            <section id="view-transactions" class="view-panel">
+                <header class="view-header">
+                    <div>
+                        <h2>Historial de Gastos y Abonos</h2>
+                        <p class="text-muted">Tabla detallada de todas tus operaciones sin scroll horizontal</p>
+                    </div>
+                    <div class="view-header-actions">
+                        <button class="btn btn-primary" id="btnNewExpenseTxView">
+                            <i data-lucide="shopping-bag"></i> Registrar Compra
+                        </button>
+                    </div>
+                </header>
+
+                <div class="table-full-card solid-card">
+                    <div class="tabs-header">
+                        <div class="filter-controls">
+                            <div class="filter-group">
+                                <select id="filterCycle" class="select-sm">
+                                    <option value="ALL">Todos los ciclos de corte</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <select id="filterType" class="select-sm">
+                                    <option value="ALL">Todos los tipos</option>
+                                    <option value="EXPENSE">Solo Compras</option>
+                                    <option value="PAYMENT">Solo Pagos / Abonos</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <select id="filterResponsible" class="select-sm">
+                                    <option value="ALL">Todos los responsables</option>
+                                    <option value="Yo">👤 Yo (Personal)</option>
+                                    <option value="Otros">👥 Otros (Préstamo 100%)</option>
+                                    <option value="Compartido">🤝 Compartido (50/50)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-sm text-muted">
+                            Mostrando <strong id="countTransactions" class="text-main">0</strong> movimientos
+                        </div>
+                    </div>
+
+                    <div class="tx-feed-container" id="transactionsListBody">
+                        <!-- Dinámico JS -->
+                    </div>
+
+                    <div id="emptyTransactionsState" class="empty-state text-center py-12" style="display: none;">
+                        <i data-lucide="folder-open" class="w-12 h-12 mx-auto text-muted mb-3 opacity-50"></i>
+                        <h4>No hay transacciones registradas</h4>
+                        <p class="text-muted text-sm mt-1">Regístralas manualmente o importa tu respaldo Excel / CSV.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VISTA 4: PROYECCIÓN DE CUOTAS MES A MES -->
+            <section id="view-installments" class="view-panel">
+                <header class="view-header">
+                    <div>
+                        <h2>Proyección de Cuotas Mes a Mes (MSI)</h2>
+                        <p class="text-muted">Timeline exacto de lo que se facturará en tus próximos cortes de cuenta</p>
+                    </div>
+                </header>
+
+                <div class="installments-grid" id="installmentsGrid">
+                    <!-- Dinámico JS -->
+                </div>
+                <div id="emptyInstallmentsState" class="empty-state glass-card text-center py-12" style="display: none;">
+                    <i data-lucide="layers" class="w-16 h-16 mx-auto text-muted mb-4 opacity-50"></i>
+                    <h3>No tienes compras a cuotas activas</h3>
+                    <p class="text-muted max-w-md mx-auto mt-2">Cuando compres algo en 2, 3, 6, 12 o 24 cuotas, verás aquí la línea de tiempo exacta mes a mes y cuándo terminas de pagar.</p>
+                </div>
+            </section>
+
+            <!-- VISTA 5: GRÁFICOS Y ANALYTICS -->
+            <section id="view-analytics" class="view-panel">
+                <header class="view-header">
+                    <div>
+                        <h2>Inteligencia Financiera & Analytics</h2>
+                        <p class="text-muted">Desglose visual instantáneo de tus hábitos de consumo</p>
+                    </div>
+                </header>
+
+                <div class="charts-grid">
+                    <div class="chart-card glass-card">
+                        <div class="chart-header">
+                            <h4>Gasto por Categoría</h4>
+                            <span class="badge badge-outline text-xs">Análisis</span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="chartCategory"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card glass-card">
+                        <div class="chart-header">
+                            <h4>Personal vs Préstamos</h4>
+                            <span class="badge badge-outline text-xs">Responsabilidad</span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="chartResponsible"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card glass-card">
+                        <div class="chart-header">
+                            <h4>Cuotas vs Contado</h4>
+                            <span class="badge badge-outline text-xs">Financiamiento</span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="chartInstallmentsVsSingle"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card glass-card">
+                        <div class="chart-header">
+                            <h4>Top Deudores</h4>
+                            <span class="badge badge-outline text-xs">Por Cobrar</span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="chartTopDebtors"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card glass-card">
+                        <div class="chart-header">
+                            <h4>Top 5 Rubros de Consumo</h4>
+                            <span class="badge badge-outline text-xs">Ranking</span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="chartTopCategories"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card glass-card">
+                        <div class="chart-header">
+                            <h4>Tendencia Histórica</h4>
+                            <span class="badge badge-outline text-xs">Últimos meses</span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="chartTrend"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL 1: REGISTRAR TRANSACCIÓN -->
+    <div class="modal-overlay" id="modalTransaction">
+        <div class="modal-card modal-md">
+            <div class="modal-header">
+                <h3 id="modalTransactionTitle">Registrar Operación</h3>
+                <button class="btn-close" id="btnCloseModalTransaction"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="modal-type-selector">
+                <button class="type-btn active" id="typeBtnExpense" data-type="EXPENSE">
+                    <i data-lucide="shopping-bag"></i> Compra / Gasto
+                </button>
+                <button class="type-btn" id="typeBtnPayment" data-type="PAYMENT">
+                    <i data-lucide="check-circle-2"></i> Abono a Tarjeta
+                </button>
+            </div>
+
+            <form id="formTransaction" class="modal-form">
+                <input type="hidden" id="txId">
+                <input type="hidden" id="txType" value="EXPENSE">
+
+                <div class="form-group">
+                    <label>Descripción / Detalle *</label>
+                    <input type="text" id="txDescription" required placeholder="Ej: Supermercado Lider, Lentes nuevos, Uber...">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label>Monto Total <span id="currencySymbolPrefix" class="text-cyan font-bold">$</span> *</label>
+                        <input type="number" id="txAmount" required min="1" step="any" placeholder="0">
+                    </div>
+                    <div class="form-group flex-1">
+                        <label>Fecha de Operación *</label>
+                        <input type="date" id="txDate" required>
+                    </div>
+                </div>
+
+                <!-- Opciones solo para COMPRAS / GASTOS -->
+                <div class="form-row" id="groupCategoryResp">
+                    <div class="form-group flex-1">
+                        <label>Categoría</label>
+                        <select id="txCategory">
+                            <option value="Supermercado">🛒 Supermercado</option>
+                            <option value="Comida">🍔 Comida y Restaurantes</option>
+                            <option value="Transporte">🚗 Transporte y Uber</option>
+                            <option value="Suscripciones">📱 Suscripciones</option>
+                            <option value="Hogar">🏠 Hogar</option>
+                            <option value="Cursos y capacitaciones">📚 Cursos y capacitaciones</option>
+                            <option value="Salud">💊 Salud y Farmacia</option>
+                            <option value="Cuidado personal">✨ Cuidado personal</option>
+                            <option value="Regalos">🎁 Regalos</option>
+                            <option value="Alcohol">🍾 Alcohol y Carrete</option>
+                            <option value="Viajes">✈️ Viajes y Pasajes</option>
+                            <option value="Otros">📦 Otros</option>
+                        </select>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label>Responsable</label>
+                        <select id="txResponsible">
+                            <option value="Yo">👤 Yo (Personal 100%)</option>
+                            <option value="Otros">👥 Otros (Me lo deben 100%)</option>
+                            <option value="Compartido">🤝 Compartido (Mitad 50/50)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Nombre de la Persona -->
+                <div class="form-group" id="groupFriendName" style="display: none;">
+                    <label class="text-purple font-semibold"><i data-lucide="user-plus" class="w-4 h-4 inline"></i> ¿Quién te debe o comparte este gasto? *</label>
+                    <input type="text" id="txFriendName" list="friendsList" placeholder="Ej: Papá, Javi, Juan Pérez...">
+                    <datalist id="friendsList"></datalist>
+                </div>
+
+                <!-- Selector de División Inteligente (Mitad, Todo o Personalizado) -->
+                <div class="form-row" id="groupSplitType" style="display: none; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); padding: 12px 14px; border-radius: 12px;">
+                    <div class="form-group flex-1">
+                        <label class="text-purple font-semibold" style="font-size: 12.5px;"><i data-lucide="pie-chart" class="w-3.5 h-3.5 inline"></i> Tipo de División</label>
+                        <select id="txSplitType" class="select-sm" style="background: #090e1a; width: 100%;">
+                            <option value="50_50">🤝 Mitad (50% tú / 50% la otra persona)</option>
+                            <option value="100_FRIEND">👥 Todo (La otra persona te debe el 100%)</option>
+                            <option value="CUSTOM">⚡ Monto Personalizado exacto ($ o %)</option>
+                        </select>
+                    </div>
+                    <div class="form-group flex-1" id="groupCustomSplitAmount" style="display: none;">
+                        <label class="text-purple font-semibold" style="font-size: 12.5px;">Monto que te debe ($)</label>
+                        <input type="number" id="txCustomFriendAmount" min="0" step="any" placeholder="Ej: 3000">
+                    </div>
+                </div>
+                <!-- Resumen en vivo de la división -->
+                <div id="splitPreviewBox" class="installment-preview-box" style="display: none; border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.05);">
+                    <div class="preview-row">
+                        <span class="text-muted">Le corresponde a esta persona:</span>
+                        <strong class="text-purple" id="previewFriendShare">$0</strong>
+                    </div>
+                    <div class="preview-row">
+                        <span class="text-muted">Tu parte personal (Yo):</span>
+                        <strong class="text-cyan" id="previewMyShare">$0</strong>
+                    </div>
+                </div>
+
+                <!-- Cuotas -->
+                <div class="form-row" id="groupInstallments">
+                    <div class="form-group flex-1">
+                        <label>Cuotas (MSI)</label>
+                        <select id="txInstallments">
+                            <option value="1">1 cuota (Al contado)</option>
+                            <option value="2">2 cuotas</option>
+                            <option value="3">3 cuotas</option>
+                            <option value="6">6 cuotas</option>
+                            <option value="10">10 cuotas</option>
+                            <option value="12">12 cuotas</option>
+                            <option value="18">18 cuotas</option>
+                            <option value="24">24 cuotas</option>
+                        </select>
+                    </div>
+                    <div class="form-group flex-1" id="groupCurrentInst" style="display: none;">
+                        <label>Cuota Actual</label>
+                        <input type="number" id="txCurrentInst" min="1" max="24" value="1" placeholder="1">
+                    </div>
+                </div>
+
+                <!-- Preview Cálculo de Cuota -->
+                <div id="installmentPreviewBox" class="installment-preview-box" style="display: none;">
+                    <div class="preview-row">
+                        <span class="text-muted">Valor por cuota mensual:</span>
+                        <strong class="text-cyan" id="previewMonthlyAmount">$0</strong>
+                    </div>
+                    <div class="preview-row">
+                        <span class="text-muted">Primer cobro en ciclo:</span>
+                        <strong id="previewFirstCycle">Ciclo actual</strong>
+                    </div>
+                </div>
+
+                <!-- Estado del Pago -->
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label>Estado de Pago / Cobro</label>
+                        <select id="txStatus">
+                            <option value="PENDING">⏳ Pendiente (Por pagar/cobrar)</option>
+                            <option value="PARTIAL">🌗 Abono Parcial (Llevo una parte)</option>
+                            <option value="PAID">✅ Pagado / Saldado completo</option>
+                        </select>
+                    </div>
+                    <div class="form-group flex-1" id="groupPartialAmount" style="display: none;">
+                        <label class="text-amber">Monto Abonado o Lleva Pagado ($)</label>
+                        <input type="number" id="txPartialAmount" min="0" step="any" placeholder="Ej: la mitad o monto exacto">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Comentario / Nota aclaratoria (Opcional)</label>
+                    <input type="text" id="txNotes" placeholder="Ej: Lentes nuevos cuota 3/6, Impuesto al parecer por el Uber...">
+                </div>
+
+                <!-- Helper para Abonos -->
+                <div id="paymentHelperBox" class="alert alert-emerald" style="display: none;">
+                    <i data-lucide="info" class="w-5 h-5 flex-shrink-0"></i>
+                    <div class="text-xs">
+                        <strong>¿Para qué sirve registrar un Abono?</strong><br>
+                        Al registrar un abono o pago de tarjeta, reduces tu saldo pendiente del ciclo y liberas límite de crédito al instante.<br>
+                        Te recomendamos abonar: <strong id="helperRemainingPay">$0</strong> para saldar tu periodo completo (Ciclo en curso + Deuda Arrastrada).
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" id="btnCancelTransaction">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveTransaction"><i data-lucide="save"></i> Guardar Operación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: CONFIGURACIÓN DE TARJETA -->
+    <div class="modal-overlay" id="modalSettings">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Configuración y Ciclos de Tarjeta</h3>
+                <button class="btn-close" id="btnCloseModalSettings"><i data-lucide="x"></i></button>
+            </div>
+            
+            <form id="formSettings" class="modal-form">
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label>Nombre Identificador de Tarjeta</label>
+                        <input type="text" id="setCardName" required placeholder="Ej: SANTANDER WORLDMEMBER">
+                    </div>
+                    <div class="form-group" style="width: 120px;">
+                        <label>Últimos 4</label>
+                        <input type="text" id="setLast4" maxlength="4" placeholder="4532">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Titular de la Cuenta</label>
+                    <input type="text" id="setHolderName" required placeholder="BENJAMÍN TRALMA GUTIÉRREZ">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label>Límite de Crédito Total ($) *</label>
+                        <input type="number" id="setCreditLimit" required min="10000" step="any" placeholder="1000000">
+                    </div>
+                    <div class="form-group flex-1">
+                        <label>Deuda Arrastrada anterior ($)</label>
+                        <input type="number" id="setInitialBalance" min="0" step="any" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="form-row mt-2">
+                    <div class="form-group flex-1">
+                        <label title="Ajuste fino para sincronizar diferencias por timbres, comisiones o redondeo de cuotas con Santander">Ajuste / Calibración Santander ($)</label>
+                        <input type="number" id="setCreditLimitOffset" step="any" placeholder="0">
+                    </div>
+                    <div class="form-group flex-1"></div>
+                </div>
+
+                <div class="divider"><span>DÍAS DE CORTE Y PAGO EN EL MES</span></div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label><i data-lucide="calendar" class="w-4 h-4 text-cyan inline"></i> Día de Corte (Cierre de ciclo)</label>
+                        <select id="setClosingDay"></select>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label><i data-lucide="calendar-check" class="w-4 h-4 text-amber inline"></i> Día Límite de Pago</label>
+                        <select id="setDueDay"></select>
+                    </div>
+                </div>
+
+                <div class="form-group mt-2">
+                    <label>Moneda Activa (Predeterminado CLP)</label>
+                    <select id="currencySelectModal">
+                        <option value="CLP">🇨🇱 CLP ($ Peso Chileno)</option>
+                        <option value="USD">🇺🇸 USD ($ Dólar)</option>
+                        <option value="MXN">🇲🇽 MXN ($ Peso Mexicano)</option>
+                        <option value="EUR">🇪🇺 EUR (€ Euro)</option>
+                        <option value="ARS">🇦🇷 ARS ($ Peso Argentino)</option>
+                    </select>
+                </div>
+
+                <div class="alert alert-cyan mt-2">
+                    <i data-lucide="clock" class="w-5 h-5 flex-shrink-0"></i>
+                    <div class="text-xs">
+                        <strong>Automatización Inteligente:</strong> Al cambiar el día de corte, el sistema re-clasifica al instante todas tus compras en sus ciclos correspondientes y recalcula los contadores de días faltantes.
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" id="btnCancelSettings">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveSettings"><i data-lucide="check"></i> Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Ajustar Fecha de Corte -->
+    <div class="modal-overlay" id="modalClosingDate">
+        <div class="modal-card modal-sm">
+            <div class="modal-header">
+                <h3>Ajustar Fecha de Corte</h3>
+                <button class="btn-close" id="btnCloseModalClosingDate"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-form" style="margin-top: 16px; padding: 20px;">
+                <div class="form-group">
+                    <label for="inputClosingDateOverride">Fecha real de corte de este ciclo</label>
+                    <input type="date" id="inputClosingDateOverride" class="form-control" />
+                </div>
+                <div class="modal-actions" style="margin-top: 28px; display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn btn-primary w-full" id="btnSaveClosingDate">Guardar</button>
+                    <button class="btn btn-ghost w-full" id="btnResetClosingDate">Restablecer automático</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: EXPORTAR RESPALDO -->
+    <div class="modal-overlay" id="modalExport">
+        <div class="modal-card modal-sm">
+            <div class="modal-header">
+                <h3>Exportar y Respaldo</h3>
+                <button class="btn-close" id="btnCloseModalExport"><i data-lucide="x"></i></button>
+            </div>
+            
+            <p class="text-muted text-sm mb-4">Descarga tus datos financieros para guardarlos de forma segura en tu computador o pasarlos a otra plataforma.</p>
+
+            <div class="export-options">
+                <div class="export-option-card" id="btnExportJSON">
+                    <div class="export-icon"><i data-lucide="file-json" class="text-cyan"></i></div>
+                    <div class="export-info">
+                        <h4>Respaldo Completo (JSON)</h4>
+                        <p class="text-xs text-muted">Archivo nativo de Santander con toda tu configuración, personas, préstamos y cuotas intactas.</p>
+                    </div>
+                    <i data-lucide="chevron-right" class="icon-arrow"></i>
+                </div>
+
+                <div class="export-option-card" id="btnExportCSV">
+                    <div class="export-icon"><i data-lucide="file-spreadsheet" class="text-emerald"></i></div>
+                    <div class="export-info">
+                        <h4>Tabla Excel / Sheets (CSV)</h4>
+                        <p class="text-xs text-muted">Tabla plana compatible con Microsoft Excel, Google Sheets, Numbers o PowerBI.</p>
+                    </div>
+                    <i data-lucide="chevron-right" class="icon-arrow"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENÚ DE HERRAMIENTAS PARA CELULAR -->
+    <div class="modal-overlay" id="modalMobileTools">
+        <div class="modal-card modal-sm mobile-tools-card">
+            <div class="modal-header">
+                <h3>Más opciones</h3>
+                <button class="btn-close" id="btnCloseMobileTools" type="button" aria-label="Cerrar más opciones"><i data-lucide="x"></i></button>
+            </div>
+            <div class="mobile-tools-list">
+                <button class="mobile-tool-button" id="btnMobileSettings" type="button">
+                    <i data-lucide="settings"></i>
+                    <span><strong>Configurar tarjeta</strong><small>Cupo, fechas, titular y moneda</small></span>
+                    <i data-lucide="chevron-right"></i>
+                </button>
+                <button class="mobile-tool-button" id="btnMobileExport" type="button">
+                    <i data-lucide="download-cloud"></i>
+                    <span><strong>Exportar respaldo</strong><small>Descargar una copia completa de tus datos</small></span>
+                    <i data-lucide="chevron-right"></i>
+                </button>
+                <button class="mobile-tool-button" id="btnMobileImport" type="button">
+                    <i data-lucide="upload-cloud"></i>
+                    <span><strong>Importar respaldo</strong><small>Cargar en este dispositivo una copia JSON</small></span>
+                    <i data-lucide="chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INPUT OCULTO PARA IMPORTACIÓN DE ARCHIVOS -->
+    <input type="file" id="importFileInput" accept=".json,.csv" style="display: none;">
+
+    <!-- TOAST NOTIFICATIONS CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js?v=20260804-7"></script>
+</body>
+</html>
