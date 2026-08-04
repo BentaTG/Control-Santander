@@ -985,6 +985,59 @@ input:focus, select:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgb
     #view-dashboard .view-header-actions .btn:nth-child(1)::after { content: "Compra"; }
     #view-dashboard .view-header-actions .btn:nth-child(2)::after { content: "Abono"; }
     .debtors-grid, .installments-grid { grid-template-columns: minmax(0, 1fr); }
+
+    /* Resumen de deuda: dos bloques simétricos y legibles en celular */
+    .debt-breakdown-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        align-items: stretch;
+        width: 100%;
+        gap: 8px;
+        padding: 10px;
+    }
+    .breakdown-pill,
+    .breakdown-pill-primary {
+        position: relative;
+        min-width: 0;
+        min-height: 108px;
+        padding: 10px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.025);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        text-align: center;
+    }
+    .breakdown-pill-primary {
+        border-color: rgba(0, 242, 254, 0.5);
+        background: rgba(0, 242, 254, 0.07);
+    }
+    .breakdown-pill > .flex-col {
+        min-width: 0;
+        align-items: center;
+        gap: 2px;
+        text-align: center !important;
+    }
+    .breakdown-pill .icon-wrapper { width: 30px; height: 30px; }
+    .breakdown-pill .stat-primary,
+    .breakdown-pill .stat-secondary {
+        white-space: nowrap;
+        line-height: 1.2;
+    }
+    .breakdown-pill .stat-primary { font-size: 17px !important; }
+    .breakdown-pill .stat-secondary { font-size: 16px !important; }
+    .breakdown-divider { align-self: center; padding: 0; }
+    .breakdown-pill .edit-initial-btn {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        margin-left: 0;
+        width: 28px;
+        height: 28px;
+    }
     .form-row { flex-direction: column; gap: 16px; }
 
     .modal-overlay { align-items: flex-end; padding: 0; }
@@ -1018,6 +1071,12 @@ input:focus, select:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgb
 }
 
 @media (max-width: 420px) {
+    .hero-debt-card { padding-inline: 12px; }
+    .debt-breakdown-row { gap: 5px; padding: 8px; }
+    .breakdown-pill,
+    .breakdown-pill-primary { min-height: 104px; padding-inline: 5px; }
+    .breakdown-pill .stat-primary { font-size: 16px !important; }
+    .breakdown-pill .stat-secondary { font-size: 15px !important; }
     .credit-card-visual { padding: 14px 16px; }
     .card-bank-name { font-size: 13px; letter-spacing: 1.1px; }
     .card-cursive-text { font-size: 21px !important; }
