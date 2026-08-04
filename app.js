@@ -11,6 +11,28 @@ const DEFAULT_CURRENCY = 'CLP';
 const DEFAULT_CARD_NAME = 'SANTANDER WORLDMEMBER';
 const DEFAULT_HOLDER_NAME = 'BENJAMÍN TRALMA GUTIÉRREZ';
 
+// UTILIDADES CORE
+function getTodayLocalString() {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function escapeHTML(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag] || tag)
+    );
+}
+
 let appData = {
     settings: {
         cardName: DEFAULT_CARD_NAME,
@@ -751,7 +773,7 @@ function setTxModalType(type) {
 function resetTxForm() {
     document.getElementById('formTransaction')?.reset();
     document.getElementById('txId').value = '';
-    document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('txDate').value = getTodayLocalString();
     document.getElementById('groupFriendName').style.display = 'none';
     const groupSplit = document.getElementById('groupSplitType');
     if (groupSplit) groupSplit.style.display = 'none';
@@ -945,7 +967,7 @@ function renderDashboardBottomRow() {
                         <i data-lucide="${iconName}" style="width: 18px; height: 18px; opacity: 0.9;"></i>
                     </div>
                     <div class="flex-col">
-                        <span style="font-size: 14px; font-weight: 600; color: #fff;">${tx.description}</span>
+                        <span style="font-size: 14px; font-weight: 600; color: #fff;">${escapeHTML(tx.description)}</span>
                         <span style="font-size: 12px; color: var(--text-muted);">${dateStr}</span>
                     </div>
                 </div>
@@ -1218,7 +1240,7 @@ function renderDebtorsView() {
                 <div class="debtor-item-row">
                     <div class="debtor-item-main" style="flex: 1; min-width: 180px;">
                         <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                            <span class="debtor-item-title">${it.description}</span>
+                            <span class="debtor-item-title">${escapeHTML(it.description)}</span>
                             <span class="badge badge-outline" style="font-size: 10px; padding: 1px 6px;">${it.responsible}</span>
                         </div>
                         <div class="debtor-item-meta">${dateStr} • Total compra: ${formatMoney(it.shareAmount)}</div>
@@ -1241,7 +1263,7 @@ function renderDebtorsView() {
                     <div class="debtor-avatar-name">
                         <div class="debtor-avatar">${initial}</div>
                         <div class="debtor-name-info">
-                            <h3>${d.name}</h3>
+                            <h3>${escapeHTML(d.name)}</h3>
                             <span>${d.items.length} préstamo(s) registrado(s)</span>
                         </div>
                     </div>
@@ -1256,7 +1278,7 @@ function renderDebtorsView() {
                 ${d.totalPending > 0 ? `
                     <div class="debtor-card-footer" style="padding: 8px 14px; background: rgba(0,0,0,0.25); border-top: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center;">
                         <span class="text-xs text-muted">¿Pagó todo de una vez?</span>
-                        <button class="btn btn-emerald btn-xs" onclick="markAllLoansPaidForPerson('${d.name}')">
+                        <button class="btn btn-emerald btn-xs" onclick="markAllLoansPaidForPerson('${escapeHTML(d.name)}')">
                             <i data-lucide="check-check" style="width:14px;height:14px;"></i> Saldar todo con ${d.name} (${formatMoney(d.totalPending)})
                         </button>
                     </div>
@@ -1484,8 +1506,8 @@ function renderTransactionsTable() {
         
         let respBadge = '';
         if (tx.responsible === 'Yo') respBadge = `<span class="badge-resp-yo">👤 Yo</span>`;
-        else if (tx.responsible === 'Otros') respBadge = `<span class="badge-resp-otros">👤 ${tx.friendName || 'Sin nombre'}</span>`;
-        else respBadge = `<span class="badge-resp-comp">👥 ${tx.friendName || 'Sin nombre'} (Comp.)</span>`;
+        else if (tx.responsible === 'Otros') respBadge = `<span class="badge-resp-otros">👤 ${escapeHTML(tx.friendName || 'Sin nombre')}</span>`;
+        else respBadge = `<span class="badge-resp-comp">👥 ${escapeHTML(tx.friendName || 'Sin nombre')} (Comp.)</span>`;
 
         let instText = '1 cuota';
         if ((tx.installments || 1) > 1) {
@@ -1534,7 +1556,7 @@ function renderTransactionsTable() {
         const amountSign = tx.type === 'EXPENSE' ? '+ ' : '- ';
 
         // Comentarios / Notas de color gris sutil con ícono diminuto, completamente diferenciado en tipografía
-        const notesHtml = tx.notes ? `<div class="tx-note-subtle" title="${tx.notes}"><i data-lucide="message-square" class="icon-tiny"></i> <span>${tx.notes}</span></div>` : '';
+        const notesHtml = tx.notes ? `<div class="tx-note-subtle" title="${escapeHTML(tx.notes)}"><i data-lucide="message-square" class="icon-tiny"></i> <span>${escapeHTML(tx.notes)}</span></div>` : '';
 
         return `
             <div class="tx-row">
@@ -1545,7 +1567,7 @@ function renderTransactionsTable() {
                     </div>
                     <!-- Textos Identidad -->
                     <div class="tx-identity-text">
-                        <span class="tx-title">${tx.description} <span class="tx-date-inline">• ${dateStr}</span></span>
+                        <span class="tx-title">${escapeHTML(tx.description)} <span class="tx-date-inline">• ${dateStr}</span></span>
                         ${notesHtml}
                     </div>
                 </div>
@@ -1721,7 +1743,7 @@ function renderInstallmentsView() {
             <div class="installment-plan-card glass-card">
                 <div class="inst-header">
                     <div>
-                        <h3 class="inst-title">${tx.description}</h3>
+                        <h3 class="inst-title">${escapeHTML(tx.description)}</h3>
                         <span class="inst-date">Comprado el ${buyDate.toLocaleDateString('es-ES')} • ${tx.category}</span>
                     </div>
                     <span class="inst-badge">MSI</span>
@@ -1933,10 +1955,12 @@ function renderSingleChart(canvasId, type, data, options) {
 
 // --- IMPORT & EXPORT (JSON / CSV) ---
 function exportJSON() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
-    const dlAnchor = document.createElement('a');
-    dlAnchor.setAttribute("href", dataStr);
-    dlAnchor.setAttribute("download", `santander_worldmember_respaldo_${new Date().toISOString().split('T')[0]}.json`);
+    const dataStr = JSON.stringify(appData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const dlAnchor = document.createElement("a");
+    dlAnchor.setAttribute("href", url);
+    dlAnchor.setAttribute("download", `santander_worldmember_respaldo_${getTodayLocalString()}.json`);
     document.body.appendChild(dlAnchor);
     dlAnchor.click();
     dlAnchor.remove();
@@ -1955,10 +1979,12 @@ function exportCSV() {
         t.amount, t.installments||1, t.currentInstallment||1, `"${t.status||'PENDING'}"`, t.partialPaidAmount||0, t.friendPaidInstallments||0, `"${(t.notes||'').replace(/"/g, '""')}"`
     ]);
 
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const dlAnchor = document.createElement('a');
-    dlAnchor.setAttribute("href", encodeURI(csvContent));
-    dlAnchor.setAttribute("download", `santander_worldmember_tabla_${new Date().toISOString().split('T')[0]}.csv`);
+    const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const dlAnchor = document.createElement("a");
+    dlAnchor.setAttribute("href", url);
+    dlAnchor.setAttribute("download", `santander_worldmember_tabla_${getTodayLocalString()}.csv`);
     document.body.appendChild(dlAnchor);
     dlAnchor.click();
     dlAnchor.remove();
@@ -2001,8 +2027,8 @@ function handleImportFile(e) {
                             appData.transactions.push({
                                 id: clean[0] || 'tx_' + Date.now() + '_' + i,
                                 type: clean[1] || 'EXPENSE',
-                                date: clean[2] || new Date().toISOString().split('T')[0],
-                                description: clean[3] || 'Importado CSV',
+                                date: clean[2] || getTodayLocalString(),
+                                description: clean[3] || '',
                                 category: clean[4] || 'Otros',
                                 responsible: clean[5] || 'Yo',
                                 friendName: clean[6] || '',

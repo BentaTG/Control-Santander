@@ -34,6 +34,18 @@ function showAuthError(msg) {
     if(authErrorMsg) authErrorMsg.innerText = msg;
 }
 
+// Traductor de Errores de Supabase
+function translateError(error) {
+    if (!error) return "Error desconocido";
+    const msg = error.message.toLowerCase();
+    if (msg.includes('invalid login credentials')) return 'Correo o contraseña incorrectos.';
+    if (msg.includes('user already registered')) return 'Este correo ya está registrado.';
+    if (msg.includes('password should be at least')) return 'La contraseña debe tener al menos 6 caracteres.';
+    if (msg.includes('email link')) return 'Revisa tu correo para verificar la cuenta.';
+    if (msg.includes('fetch')) return 'Error de conexión. Revisa tu internet.';
+    return error.message;
+}
+
 // Inicialización
 async function initSupabase() {
     if (!window.supabase) {
@@ -90,11 +102,10 @@ if (btnLogin) {
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         
         if (error) {
-            showAuthError('Error: ' + error.message);
+            showAuthError(translateError(error));
+            btnLogin.disabled = false;
+            btnLogin.innerText = 'Iniciar Sesión';
         }
-        
-        btnLogin.disabled = false;
-        btnLogin.innerText = 'Iniciar Sesión';
     });
 }
 
@@ -112,13 +123,14 @@ if (btnRegister) {
         const { data, error } = await supabaseClient.auth.signUp({ email, password });
         
         if (error) {
-            showAuthError('Error: ' + error.message);
+            showAuthError(translateError(error));
+            btnRegister.disabled = false;
+            btnRegister.innerText = 'Registrarse';
         } else {
             showAuthError('Cuenta creada. Ya puedes iniciar sesión.');
+            btnRegister.disabled = false;
+            btnRegister.innerText = 'Registrarse';
         }
-        
-        btnRegister.disabled = false;
-        btnRegister.innerText = 'Registrarse';
     });
 }
 
