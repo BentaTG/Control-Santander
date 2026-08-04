@@ -974,9 +974,20 @@ input:focus, select:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgb
     .main-content.expanded-canvas,
     .sidebar.collapsed ~ .main-content {
         margin-left: 0;
-        padding: 20px 14px calc(100px + env(safe-area-inset-bottom));
+        padding: 20px 14px calc(88px + env(safe-area-inset-bottom));
         width: 100%;
         max-width: 100%;
+    }
+    /* En celular usamos un solo scroll para evitar espacio vacío al final. */
+    .view-panel.active {
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+    }
+    #view-dashboard.active {
+        overflow: visible;
+        padding-right: 0;
+        padding-bottom: 0;
     }
     .view-header-actions { width: 100%; max-width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
     .view-header-actions .btn { min-width: 0; width: 100%; padding-inline: 10px; }
@@ -1093,20 +1104,43 @@ input:focus, select:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgb
 
     /* Deudas: tarjetas con altura natural y controles visibles */
     .debtors-grid {
+        flex: none;
         grid-auto-rows: max-content;
         align-content: start;
         align-items: start;
+        overflow: visible;
+        padding-right: 0;
+        padding-bottom: 0;
     }
     .debtor-person-card { width: 100%; height: auto; align-self: start; }
     .debtor-items-list { flex: none; }
     .debtor-header { gap: 10px; padding: 12px; }
     .debtor-avatar-name, .debtor-name-info { min-width: 0; }
     .debtor-name-info h3, .debtor-name-info span { overflow-wrap: anywhere; }
+    .debtor-header > .text-right {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        text-align: right;
+    }
+    .debtor-total-val,
+    .debtor-item-amount {
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.2;
+    }
     .debtor-item-row { flex-direction: column; align-items: stretch; padding: 12px; }
     .debtor-item-main { width: 100%; min-width: 0 !important; }
     .debtor-item-meta { flex-wrap: wrap; line-height: 1.4; }
-    .debtor-item-summary { width: 100%; justify-content: space-between !important; }
-    .debtor-item-actions { max-width: 100%; flex-wrap: wrap; justify-content: flex-end; }
+    .debtor-item-summary {
+        width: 100%;
+        display: grid !important;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        gap: 10px;
+    }
+    .debtor-item-actions { max-width: 100%; flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
     .debtor-item-actions .btn { max-width: 100%; white-space: normal; line-height: 1.25; }
     .debtor-card-footer { flex-direction: column; align-items: stretch !important; gap: 8px; }
     .debtor-card-footer > span { text-align: center; }
@@ -1139,8 +1173,11 @@ input:focus, select:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgb
     .tx-row-financials { width: 100%; margin-top: 2px; padding-top: 10px; }
     .tx-row-status { width: 100%; justify-content: flex-end; }
 
-    /* Permite desplazar el último elemento completamente sobre la barra inferior */
+    /* El espacio para la barra inferior ya lo aporta .main-content. */
     .debtors-grid, .tx-feed-container, .installments-grid, .charts-grid {
-        padding-bottom: calc(90px + env(safe-area-inset-bottom));
+        flex: none;
+        overflow: visible;
+        padding-right: 0;
+        padding-bottom: 0;
     }
 }
