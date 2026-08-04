@@ -787,18 +787,18 @@ select:focus option, select:hover option {
 .badge-outline { border: 1px solid var(--card-border); color: var(--text-muted); }
 .badge-purple { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; }
 
-/* Modals */
+/* Modals (Glassmorphism) */
 .modal-overlay {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
     z-index: 1000; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.15s var(--ease-144hz);
 }
 .modal-overlay.open { opacity: 1; pointer-events: auto; }
 .modal-card {
-    width: 100%; max-width: 580px; background: #0d1424; border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 22px; padding: 28px 32px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+    width: 100%; max-width: 580px; background: rgba(13, 20, 36, 0.85); border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 22px; padding: 28px 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
     transform: translateZ(0) scale(0.96); transition: transform 0.15s var(--ease-144hz); max-height: 90vh; overflow-y: auto;
-    will-change: transform, opacity;
 }
 .modal-overlay.open .modal-card { transform: translateZ(0) scale(1); }
 .modal-md { max-width: 620px; }
