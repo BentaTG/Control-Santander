@@ -1976,7 +1976,11 @@ function handleImportFile(e) {
             if (file.name.endsWith('.json')) {
                 const parsed = JSON.parse(content);
                 if (parsed && Array.isArray(parsed.transactions)) {
-                    appData = parsed;
+                    appData = { 
+                        ...appData, 
+                        ...parsed, 
+                        settings: { ...appData.settings, ...(parsed.settings || parsed.config || {}) } 
+                    };
                     saveData();
                     loadFriendsList();
                     initUI();

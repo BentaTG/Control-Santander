@@ -227,14 +227,14 @@ async function pushLocalToSupabase() {
         // Subir Settings
         const dbSettings = {
             user_id: currentUser.id,
-            card_name: appData.settings.cardName,
-            last4: appData.settings.last4,
-            holder_name: appData.settings.holderName,
-            credit_limit: appData.settings.creditLimit,
-            initial_balance: appData.settings.initialBalance,
-            closing_day: appData.settings.closingDay,
-            due_day: appData.settings.dueDay,
-            currency: appData.settings.currency,
+            card_name: appData.settings?.cardName || 'SANTANDER WORLDMEMBER',
+            last4: appData.settings?.last4 || '4532',
+            holder_name: appData.settings?.holderName || 'BENJAMÍN TRALMA GUTIÉRREZ',
+            credit_limit: appData.settings?.creditLimit || 1000000,
+            initial_balance: appData.settings?.initialBalance || 0,
+            closing_day: appData.settings?.closingDay || 25,
+            due_day: appData.settings?.dueDay || 5,
+            currency: appData.settings?.currency || 'CLP',
             updated_at: new Date().toISOString()
         };
 
@@ -245,19 +245,19 @@ async function pushLocalToSupabase() {
             const dbTx = appData.transactions.map(tx => ({
                 id: tx.id,
                 user_id: currentUser.id,
-                type: tx.type,
-                date: tx.date,
-                description: tx.description,
-                category: tx.category,
-                responsible: tx.responsible,
-                friend_name: tx.friendName,
-                amount: tx.amount,
-                installments: tx.installments,
-                current_installment: tx.currentInstallment,
-                status: tx.status,
-                partial_paid_amount: tx.partialPaidAmount,
-                friend_paid_installments: tx.friendPaidInstallments,
-                notes: tx.notes,
+                type: tx.type || 'EXPENSE',
+                date: tx.date || new Date().toISOString().split('T')[0],
+                description: tx.description || 'Sin descripción',
+                category: tx.category || 'Otros',
+                responsible: tx.responsible || 'Yo',
+                friend_name: tx.friendName || '',
+                amount: tx.amount || 0,
+                installments: tx.installments || 1,
+                current_installment: tx.currentInstallment || 1,
+                status: tx.status || 'PENDING',
+                partial_paid_amount: tx.partialPaidAmount || 0,
+                friend_paid_installments: tx.friendPaidInstallments || 0,
+                notes: tx.notes || '',
                 updated_at: new Date().toISOString()
             }));
             
