@@ -1,6 +1,6 @@
 {
-  "name": "Tarjeta Clara",
-  "short_name": "Tarjeta Clara",
+  "name": "Gastos Santander",
+  "short_name": "Gastos Santander",
   "description": "Control de gastos y administración de tarjeta Santander.",
   "start_url": "./index.html",
   "display": "standalone",

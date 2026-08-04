@@ -796,7 +796,7 @@ select:focus option, select:hover option {
 }
 .modal-overlay.open { opacity: 1; pointer-events: auto; }
 .modal-card {
-    width: 100%; max-width: 580px; background: var(--bg-card); border: 1px solid var(--card-border);
+    width: 100%; max-width: 580px; background: var(--card-bg); border: 1px solid var(--card-border);
     border-radius: 22px; padding: 28px 32px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
     transform: translateY(20px); transition: transform 0.2s ease; max-height: 90vh; overflow-y: auto;
 }
