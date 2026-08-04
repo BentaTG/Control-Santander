@@ -993,8 +993,8 @@ input:focus, select:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgb
     .sidebar-nav { flex-direction: row; justify-content: space-around; width: 100%; gap: 2px; }
     .nav-item { flex-direction: column; gap: 2px; min-width: 0; padding: 6px 1px; font-size: 10px; text-align: center; border-radius: 8px; flex: 1 1 0; justify-content: center; }
     .nav-item-mobile-more { display: flex; }
-    .sidebar .nav-label, .sidebar.collapsed .nav-label { display: block; width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: 0; line-height: 1.15; opacity: 1; }
-    .sidebar .nav-label::after { display: block; font-size: 10px; white-space: nowrap; }
+    .sidebar .nav-label, .sidebar.collapsed .nav-label { display: block; width: 100%; overflow: visible; font-size: 0; line-height: normal; opacity: 1; padding-bottom: 2px; }
+    .sidebar .nav-label::after { display: block; font-size: 10px; white-space: nowrap; line-height: 1.2; }
     .nav-item[data-view="view-dashboard"] .nav-label::after { content: "Inicio"; }
     .nav-item[data-view="view-transactions"] .nav-label::after { content: "Movimientos"; }
     .nav-item[data-view="view-debtors"] .nav-label::after { content: "Deudas"; }
