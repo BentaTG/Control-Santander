@@ -904,7 +904,12 @@ function renderDashboardBottomRow() {
     const summarySpan = document.getElementById('recentPurchasesSummary');
     if (summarySpan) {
         if (topCategory && topCategoryAmount > 0) {
-            summarySpan.innerHTML = `Mayor gasto: ${getCategoryBadgeHtml(topCategory)} <span style="opacity: 0.5;">&bull;</span> <strong style="font-weight: 600; color: var(--text-main); font-size: 13.5px;">${formatMoney(topCategoryAmount)}</strong>`;
+            summarySpan.innerHTML = `
+                <span class="recent-summary-label">Mayor gasto:</span>
+                <span class="recent-summary-category">${getCategoryBadgeHtml(topCategory)}</span>
+                <span class="recent-summary-separator" aria-hidden="true">&bull;</span>
+                <strong class="recent-summary-amount">${formatMoney(topCategoryAmount)}</strong>
+            `;
         } else {
             summarySpan.innerText = 'Sin gastos registrados este ciclo';
         }

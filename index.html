@@ -14,7 +14,7 @@
     <!-- Chart.js CDN (Esencial para renderizar los gráficos del Analytics) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-    <link rel="stylesheet" href="style.css?v=20260804-9">
+    <link rel="stylesheet" href="style.css?v=20260804-10">
 </head>
 <body>
 
@@ -262,14 +262,12 @@
                     <!-- NUEVA FILA: Compras Recientes (Integrada en el Grid) -->
                     <div class="dashboard-bottom-row" style="grid-column: 1 / -1; width: 100%;">
                         <div class="bento-card solid-card flex-col" style="padding: 20px; min-height: 320px;">
-                            <div class="flex-between align-center mb-3">
-                                <div class="flex-col text-left">
-                                    <h3 class="bento-title m-0">Compras Recientes</h3>
-                                    <div id="recentPurchasesSummary" class="text-muted" style="margin-top: 4px; display: flex; align-items: center; gap: 6px; font-size: 13.5px;"></div>
-                                </div>
+                            <div class="recent-purchases-header mb-3">
+                                <h3 class="bento-title m-0">Compras Recientes</h3>
                                 <button class="btn-ghost-cyan text-xs flex align-center gap-1" onclick="document.querySelector('[data-view=view-transactions]').click()" style="background: transparent; border: none; cursor: pointer; color: var(--cyan); font-weight: 600;">
                                     Ver todas <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
                                 </button>
+                                <div id="recentPurchasesSummary" class="recent-purchases-summary text-muted"></div>
                             </div>
                             <div id="recentPurchasesList" class="flex-col gap-2">
                                 <!-- JS dinámico -->
