@@ -788,12 +788,12 @@ function resetTxForm() {
 
 // --- RENDER FUNCTIONS ---
 function renderAll() {
-    renderDashboard();
-    renderDebtorsView();
-    renderCycleFilterOptions();
-    renderTransactionsTable();
-    renderInstallmentsView();
-    updateSidebarBadges();
+    try { renderDashboard(); } catch(e) { console.error('renderDashboard error:', e); }
+    try { renderDebtorsView(); } catch(e) { console.error('renderDebtorsView error:', e); }
+    try { renderCycleFilterOptions(); } catch(e) { console.error('renderCycleFilterOptions error:', e); }
+    try { renderTransactionsTable(); } catch(e) { console.error('renderTransactionsTable error:', e); }
+    try { renderInstallmentsView(); } catch(e) { console.error('renderInstallmentsView error:', e); }
+    try { updateSidebarBadges(); } catch(e) { console.error('updateSidebarBadges error:', e); }
 }
 
 function updateSidebarBadges() {
