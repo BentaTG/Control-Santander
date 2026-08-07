@@ -982,7 +982,7 @@ function renderDashboardBottomRow() {
         `;
     }).join('');
     
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons({ root: grid });
 }
 
 function calculateCycleSummary(refDate = new Date()) {
@@ -1286,7 +1286,7 @@ function renderDebtorsView() {
         `;
     }).join('');
 
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons({ root: grid });
 }
 
 window.collectNextFriendInstallment = function(txId) {
@@ -1598,7 +1598,7 @@ function renderTransactionsTable() {
         `;
     }).join('');
 
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons({ root: tbody });
 }
 
 window.toggleTxStatus = function(txId) {
@@ -2071,7 +2071,7 @@ function showToast(msg, type = 'info') {
 
     toast.innerHTML = `<i data-lucide="${icon}"></i> <span>${msg}</span>`;
     container.appendChild(toast);
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons({ root: toast });
 
     setTimeout(() => {
         toast.style.opacity = '0';
