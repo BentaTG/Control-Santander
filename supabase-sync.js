@@ -146,8 +146,8 @@ if (btnLogout) {
 
 // --- LÓGICA DE SINCRONIZACIÓN ---
 
-async function initialSync() {
-    showSyncOverlay('Descargando datos...');
+async function initialSync(silent = false) {
+    if (!silent) showSyncOverlay('Descargando datos...');
     try {
         // 1. Obtener settings
         const { data: settingsData, error: settingsError } = await supabaseClient
@@ -228,7 +228,7 @@ async function initialSync() {
     } catch (e) {
         console.error('Sync error:', e);
     }
-    hideSyncOverlay();
+    if (!silent) hideSyncOverlay();
 }
 
 async function pushLocalToSupabase(silent = false) {
@@ -298,14 +298,14 @@ function setupRealtimeSubscription() {
         { event: '*', schema: 'public', table: 'transactions' },
         async (payload) => {
             console.log('Realtime change received!', payload);
-            await initialSync();
+            await initialSync(true); // Sincronización silenciosa en realtime
         }
     )
     .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'user_settings' },
         async (payload) => {
-            await initialSync();
+            await initialSync(true); // Sincronización silenciosa en realtime
         }
     )
     .subscribe();
