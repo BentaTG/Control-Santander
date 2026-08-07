@@ -146,6 +146,12 @@ if (btnLogout) {
 
 // --- LÓGICA DE SINCRONIZACIÓN ---
 
+// Flag para ignorar ecos de nuestros propios cambios
+let _lastLocalPushTime = 0;
+const ECHO_IGNORE_MS = 5000; // Ignorar eventos realtime dentro de 5s después de un push local
+let _syncDebounceTimer = null;
+const SYNC_DEBOUNCE_MS = 1500; // Esperar 1.5s de inactividad antes de sincronizar
+
 async function initialSync(silent = false) {
     if (!silent) showSyncOverlay('Descargando datos...');
     try {
@@ -297,15 +303,24 @@ function setupRealtimeSubscription() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'transactions' },
         async (payload) => {
-            console.log('Realtime change received!', payload);
-            await initialSync(true); // Sincronización silenciosa en realtime
+            // Ignorar si el cambio fue nuestro propio eco
+            if (Date.now() - _lastLocalPushTime < ECHO_IGNORE_MS) {
+                console.log('Realtime echo ignorado (transactions)');
+                return;
+            }
+            console.log('Realtime change from another device!', payload);
+            await initialSync(true);
         }
     )
     .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'user_settings' },
         async (payload) => {
-            await initialSync(true); // Sincronización silenciosa en realtime
+            if (Date.now() - _lastLocalPushTime < ECHO_IGNORE_MS) {
+                console.log('Realtime echo ignorado (settings)');
+                return;
+            }
+            await initialSync(true);
         }
     )
     .subscribe();
@@ -319,6 +334,19 @@ window.addEventListener('DOMContentLoaded', () => {
 
 window.syncToSupabase = async function(silent = false) {
     if (!currentUser) return;
-    if (!silent) showSyncOverlay('Guardando en la nube...');
-    await pushLocalToSupabase(silent);
+    
+    // Debounce: si el usuario hace muchos clics rápidos, solo sincronizar una vez al final
+    if (silent) {
+        clearTimeout(_syncDebounceTimer);
+        _syncDebounceTimer = setTimeout(async () => {
+            _lastLocalPushTime = Date.now();
+            await pushLocalToSupabase(true);
+        }, SYNC_DEBOUNCE_MS);
+        return;
+    }
+    
+    // Sync manual (no debounced)
+    showSyncOverlay('Guardando en la nube...');
+    _lastLocalPushTime = Date.now();
+    await pushLocalToSupabase(false);
 };
