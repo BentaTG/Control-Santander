@@ -231,9 +231,9 @@ async function initialSync() {
     hideSyncOverlay();
 }
 
-async function pushLocalToSupabase() {
+async function pushLocalToSupabase(silent = false) {
     if (!currentUser) return;
-    showSyncOverlay('Subiendo respaldo...');
+    if (!silent) showSyncOverlay('Subiendo respaldo...');
     
     try {
         // Subir Settings
@@ -288,7 +288,7 @@ async function pushLocalToSupabase() {
     } catch(e) {
         console.error("Error pushing data:", e);
     }
-    hideSyncOverlay();
+    if (!silent) hideSyncOverlay();
 }
 
 function setupRealtimeSubscription() {
@@ -317,8 +317,8 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 500);
 });
 
-window.syncToSupabase = async function() {
+window.syncToSupabase = async function(silent = false) {
     if (!currentUser) return;
-    showSyncOverlay('Guardando en la nube...');
-    await pushLocalToSupabase();
+    if (!silent) showSyncOverlay('Guardando en la nube...');
+    await pushLocalToSupabase(silent);
 };

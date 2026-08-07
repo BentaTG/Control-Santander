@@ -247,7 +247,7 @@ function saveData() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
     renderAll();
     if (typeof window.syncToSupabase === 'function') {
-        window.syncToSupabase();
+        window.syncToSupabase(true);
     }
 }
 
@@ -1045,15 +1045,14 @@ function calculateCycleSummary(refDate = new Date()) {
                 totalExpense += instAmount;
                 activeExpensesCount++;
                 categoryTotals[tx.category || 'Otros'] = (categoryTotals[tx.category || 'Otros'] || 0) + instAmount;
-                // SOLO los gastos personales ('Yo') marcados como pagados al banco
-                // cuentan como pagos realizados A LA TARJETA en este ciclo.
-                if (tx.responsible === 'Yo' || !tx.responsible) {
-                    if (tx.status === 'PAID') {
-                        totalPaid += instAmount;
-                        paidItemsCount++;
-                    } else if (tx.status === 'PARTIAL' && tx.partialPaidAmount > 0) {
-                        totalPaid += Math.min(instAmount, tx.partialPaidAmount);
-                    }
+                
+                // Si el estado es pagado al banco (PAID), cuenta como pago realizado a la tarjeta, 
+                // independientemente de si el responsable fuiste tú o un amigo.
+                if (tx.status === 'PAID') {
+                    totalPaid += instAmount;
+                    paidItemsCount++;
+                } else if (tx.status === 'PARTIAL' && tx.partialPaidAmount > 0) {
+                    totalPaid += Math.min(instAmount, tx.partialPaidAmount);
                 }
             }
 
