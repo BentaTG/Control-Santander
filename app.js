@@ -982,7 +982,7 @@ function renderDashboardBottomRow() {
         `;
     }).join('');
     
-    if (window.lucide) lucide.createIcons({ root: grid });
+    if (window.lucide) lucide.createIcons({ root: container });
 }
 
 function calculateCycleSummary(refDate = new Date()) {
