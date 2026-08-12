@@ -1015,31 +1015,10 @@ function calculateCycleSummary(refDate = new Date()) {
             }
 
             // 1. Cálculo exacto de Deuda Acumulada / Utilizado en Santander
-            if (tx.responsible === 'Otros' || tx.responsible === 'Compartido') {
-                // En Santander, un préstamo u operación a terceros sigue ocupando cupo hasta que TÚ le pagas al banco.
-                // El reembolso de tu amigo no reduce tu deuda con Santander.
-                if (isInst) {
-                    const pastPaidInst = Math.max(0, (tx.currentInstallment || 1) - 1);
-                    const pastPaidAmount = instAmount * pastPaidInst;
-                    totalDebtAccumulated += Math.max(0, tx.amount - pastPaidAmount);
-                } else {
-                    totalDebtAccumulated += tx.amount;
-                }
-            } else {
-                // Gastos personales ('Yo')
-                if (tx.status !== 'PAID') {
-                    if (isInst) {
-                        const pastPaidInst = Math.max(0, (tx.currentInstallment || 1) - 1);
-                        const pastPaidAmount = instAmount * pastPaidInst;
-                        const partial = (tx.status === 'PARTIAL' && tx.partialPaidAmount > 0) ? tx.partialPaidAmount : 0;
-                        totalDebtAccumulated += Math.max(0, tx.amount - pastPaidAmount - partial);
-                    } else if (tx.status === 'PARTIAL' && tx.partialPaidAmount > 0) {
-                        totalDebtAccumulated += (tx.amount - tx.partialPaidAmount);
-                    } else {
-                        totalDebtAccumulated += tx.amount;
-                    }
-                }
-            }
+            // El banco descuenta el MONTO TOTAL de la compra (incluso en cuotas) del cupo de inmediato.
+            // El estado 'Pagado' interno de la app NO devuelve cupo en el banco. 
+            // El cupo SOLO se devuelve cuando se registra un 'Abono' real a la tarjeta.
+            totalDebtAccumulated += tx.amount;
 
             if (isExpenseInCycle) {
                 totalExpense += instAmount;
