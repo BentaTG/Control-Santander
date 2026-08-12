@@ -1497,6 +1497,10 @@ function renderTransactionsTable() {
     }
 
     emptyState.style.display = 'none';
+    
+    // Ordenar por fecha descendente (más reciente primero)
+    filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
     tbody.innerHTML = filtered.map(tx => {
         const dateStr = new Date(tx.date + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
         
